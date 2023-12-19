@@ -4,40 +4,36 @@ const bcrypt = require('bcrypt');
 const userController = {
     signup: async (request, response) => {
         try {
+            // get the username, name, and password from the request body
             const { username, name, password } = request.body;
-            const existingUser = await user.findOne({ username });
-            if (existingUser) {
-                response.status(200).json({ message: 'Username already exists' });
-            } else {
-                const passwordHash = await bcrypt.hash(password, 10);
-                const newUser = new user({
-                    username,
-                    name,
-                    passwordHash
-                });
-                const savedUser = await newUser.save();
-                response.status(200).json({ message: 'User created successfully', user: savedUser });
+
+            // check if the username already exists in the database
+            const user = await User.findOne({ username });
+
+            // if the username already exists, return an error
+            if (user) {
+                return response.status(400).json({ error: 'username already exists' });
             }
+
+            // if the username is unique, create a new user
+
+            // hash the password
+            const passwordHash = await bcrypt.hash(password, 10);
+
+            // create a new user with the username, name, and hashed password
+            const newUser = new User({
+                username,
+                name,
+                passwordHash
+            });
+
+            // save the user to the database
+            const savedUser = await newUser.save();
+
+            // return the saved user
+            response.json({ message: 'user created', user: savedUser });
         } catch (error) {
-            response.status(500).json({ message: 'Error creating user' });
-        }
-    },
-
-    signin: async (request, response) => {
-        try {
-            const { username, password } = request.body
-            const user = await user.findOne({ username })
-            if (!user) {
-                response.status(404).json({ message: "user not found" })
-            }
-            const passwordMatch = await bcrypt.compare(password, user.passwordHash)
-
-            if (!passwordMatch) {
-                response.status(404).json({message: "incorrect password"})
-            }
-
-        } catch (error) {
-            response.status(404).json({ error: error.message })
+            response.status(500).json({ error: error.message })
         }
     }
 }
