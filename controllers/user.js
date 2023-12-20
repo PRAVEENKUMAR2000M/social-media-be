@@ -44,10 +44,9 @@ const userController = {
             if (!passwordMatch) {
                 return response.json({ error: 'incorrect password' });
             }
-
-            response.json({ message: 'user signed in', token, username: user.username, name: user.name });
+            
         } catch (error) {
-            response.status(500).json({ error: error.message })
+            response.status(500).json({ message: "error fetching the data" })
         }
     },
 }
